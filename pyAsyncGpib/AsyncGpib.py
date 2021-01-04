@@ -92,10 +92,11 @@ class AsyncGpib:
         # Test if we have an error. This will be a tuple (error, ibsta).
         if isinstance(result, tuple) and isinstance(result[0], gpib.GpibError):
             error, ibsta = result
-            if self.__gpib.ibsta() & Gpib.TIMO:
+            if ibsta & Gpib.TIMO:
+                # The status (ibsta) returned a timeout
                 raise asyncio.TimeoutError() from None
             else:
-                raise result from None
+                raise error from None
         self.__result_queue.async_q.task_done()
         return result
 
