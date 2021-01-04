@@ -68,8 +68,7 @@ class AsyncGpib:
 
     def __main(self):
         """
-        This is the thread, that serves the queues and manages
-        the GPIB adapter.
+        This is the thread, that serves the queues and manages the GPIB adapter.
         """
         while 'thread is not canceled':
             try:
@@ -80,6 +79,7 @@ class AsyncGpib:
                 job.process(self.__result_queue.sync_q)
             except gpib.GpibError as error:
                 self.__logger.error(error)
+                self.__result_queue.sync_q.put((error, self.__gpib.ibsta()))
             finally:
                 self.__job_queue.sync_q.task_done()
 
@@ -88,6 +88,14 @@ class AsyncGpib:
     async def __query_job(self, task, *args, **kwargs):
         await self.__job_queue.async_q.put(Job(task, *args, **kwargs))
         result = await self.__result_queue.async_q.get()
+        # This is not very pythonic, but it gets the job done
+        # Test if we have an error. This will be a tuple (error, ibsta).
+        if isinstance(result, tuple) and isinstance(result[0], gpib.GpibError):
+            error, ibsta = result
+            if self.__gpib.ibsta() & Gpib.TIMO:
+                raise asyncio.TimeoutError() from None
+            else:
+                raise result from None
         self.__result_queue.async_q.task_done()
         return result
 
