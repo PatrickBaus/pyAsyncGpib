@@ -38,40 +38,41 @@ class Job:
 class AsyncGpib:
     @property
     def id(self):
-        return self.__gpib.id
+        return self.__device.id
 
     def __repr__(self):
-        return repr(self.__gpib)
+        return repr(self.__device)
 
     """
     name: Either e.g. "gpib0" (string) or 0 (integer)
     pad: primary address
     """
     def __init__(self, name = 'gpib0', pad = None, sad = 0, timeout = 13, send_eoi = 1, eos_mode = 0):
-        self.__gpib = Gpib.Gpib(name, pad, sad, timeout, send_eoi, eos_mode)
+        self.__device = Gpib.Gpib(name, pad, sad, timeout, send_eoi, eos_mode)
+        self.__board = Gpib.Gpib(name)
 
-        self.__gpib_task = None
+        self.__device_task = None
         self.__logger = logging.getLogger(__name__)
 
     async def connect(self):
         # Only connect if we are disconnected
-        if self.__gpib_task is None:
+        if self.__device_task is None:
             # create two queues to talk to asyncio from our thread
             self.__job_queue = janus.Queue()
             self.__result_queue = janus.Queue()
 
             loop = asyncio.get_running_loop()
-            self.__gpib_task = loop.run_in_executor(None, self.__main)
+            self.__device_task = loop.run_in_executor(None, self.__main)
             #await self.interface_clear()
 
     async def disconnect(self):
-        if self.__gpib_task is not None:
+        if self.__device_task is not None:
             try:
                 await self.__job_queue.async_q.put(None)
                 await self.__job_queue.async_q.join()
-                await self.__gpib_task
+                await self.__device_task
             finally:
-                self.__gpib_task = None
+                self.__device_task = None
 
     def __main(self):
         """
@@ -85,7 +86,7 @@ class AsyncGpib:
                     break
                 job.process(self.__result_queue.sync_q)
             except gpib.GpibError as error:
-                status = self.__gpib.ibsta()
+                status = self.__device.ibsta()
                 if not (status & Gpib.TIMO):
                     # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
                     self.__logger.error(error)
@@ -117,56 +118,59 @@ class AsyncGpib:
         await self.disconnect()
 
     async def command(self, str):
-        await self.__query_job(self.__gpib.command, str)
+        await self.__query_job(self.__device.command, str)
 
     async def config(self, option, value):
-        return await self.__query_job(self.__gpib.config, option, value)
+        return await self.__query_job(self.__device.config, option, value)
 
     async def interface_clear(self):
-       await self.__query_job(self.__gpib.interface_clear)
+       await self.__query_job(self.__device.interface_clear)
 
     async def write(self, command):
         self.__logger.debug('Writing data: %(payload)s', {'payload': command})
-        await self.__query_job(self.__gpib.write, command)
+        await self.__query_job(self.__device.write, command)
 
     async def read(self, len=512):
-        result = await self.__query_job(self.__gpib.read, len)
+        result = await self.__query_job(self.__device.read, len)
         self.__logger.debug("Data read: %(data)s", {'data': result})
         return result
 
     async def listener(self, pad, sad=0):
-        return await self.__query_job(self.__gpib.listener, pad, sad)
+        return await self.__query_job(self.__device.listener, pad, sad)
 
     async def lines(self):
-        return await self.__query_job(self.__gpib.lines)
+        return await self.__query_job(self.__device.lines)
 
     async def ask(self, option):
-        return await self.__query_job(self.__gpib.ask, option)
+        return await self.__query_job(self.__device.ask, option)
 
     async def clear(self):
-        await self.__query_job(self.__gpib.clear)
+        await self.__query_job(self.__device.clear)
 
     async def wait(self, mask):
-        await self.__query_job(self.__gpib.wait, mask)
+        if
+        await self.__query_job(self.__device.wait, mask)
 
     async def serial_poll(self):
-        return await self.__query_job(self.__gpib.serial_poll)
+        return await self.__query_job(self.__device.serial_poll)
 
     async def trigger(self):
-        await self.__query_job(self.__gpib.trigger)
+        await self.__query_job(self.__device.trigger)
 
     async def remote_enable(self, val):
-        return await self.__query_job(self.__gpib.remote_enable, val)
+        return await self.__query_job(self.__device.remote_enable, val)
 
     async def ibloc(self):
-        await self.__query_job(self.__gpib.ibloc)
+        await self.__query_job(self.__device.ibloc)
 
     async def ibsta(self):
-        return await self.__query_job(self.__gpib.ibsta)
+        return await self.__query_job(self.__device.ibsta)
 
     async def ibcnt(self):
-        return await self.__query_job(self.__gpib.ibcnt)
+        return await self.__query_job(self.__device.ibcnt)
 
     async def timeout(self, value):
-        return await self.__query_job(self.__gpib.timeout)
+        return await self.__query_job(self.__device.timeout)
 
+    async def set_auto_polling(self, enabled):
+        return await self.__query_job(self.__board.config, gpib.IbcAUTOPOLL, enabled)
