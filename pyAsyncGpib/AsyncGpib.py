@@ -36,6 +36,13 @@ class Job:
         result_queue_sync.put(result)
 
 class AsyncGpib:
+    @property
+    def id(self):
+        return self.__gpib.id
+
+    def __repr__(self):
+        return repr(self.__gpib)
+
     """
     name: Either e.g. "gpib0" (string) or 0 (integer)
     pad: primary address
@@ -78,8 +85,11 @@ class AsyncGpib:
                     break
                 job.process(self.__result_queue.sync_q)
             except gpib.GpibError as error:
-                self.__logger.error(error)
-                self.__result_queue.sync_q.put((error, self.__gpib.ibsta()))
+                status = self.__gpib.ibsta()
+                if not (status & Gpib.TIMO):
+                    # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
+                    self.__logger.error(error)
+                self.__result_queue.sync_q.put((error, status))
             finally:
                 self.__job_queue.sync_q.task_done()
 
