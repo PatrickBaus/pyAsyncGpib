@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
-# Copyright (C) 2020  Patrick Baus
+# Copyright (C) 2021  Patrick Baus
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -63,7 +63,6 @@ class AsyncGpib:
 
             loop = asyncio.get_running_loop()
             self.__device_task = loop.run_in_executor(None, self.__main)
-            #await self.interface_clear()
 
     async def disconnect(self):
         if self.__device_task is not None:
@@ -83,6 +82,8 @@ class AsyncGpib:
                 job = self.__job_queue.sync_q.get()
                 if job is None:
                     # If we have a 'None' job in the queue, we are done
+                    self.__device.close()
+                    self.__board.close()
                     break
                 job.process(self.__result_queue.sync_q)
             except gpib.GpibError as error:
@@ -94,7 +95,7 @@ class AsyncGpib:
             finally:
                 self.__job_queue.sync_q.task_done()
 
-        self.__logger.info("Shutting down GPIB")
+        self.__logger.info("GPIB connection shut down.")
 
     async def __query_job(self, task, *args, **kwargs):
         await self.__job_queue.async_q.put(Job(task, *args, **kwargs))
@@ -148,7 +149,6 @@ class AsyncGpib:
         await self.__query_job(self.__device.clear)
 
     async def wait(self, mask):
-        if
         await self.__query_job(self.__device.wait, mask)
 
     async def serial_poll(self):
