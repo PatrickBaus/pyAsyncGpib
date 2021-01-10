@@ -24,7 +24,6 @@ import logging
 # AsyncGpib
 import Gpib
 import gpib
-import janus
 
 class Job:
     def __init__(self, task, *args, **kwargs):
