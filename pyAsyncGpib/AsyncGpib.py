@@ -66,7 +66,7 @@ class AsyncGpib:
     async def __wrapper(self, func, *args, **kwargs):
         try:
             return await asyncio.get_running_loop().run_in_executor(self.__threadpool, func, *args, **kwargs)
-         except gpib.GpibError as error:
+        except gpib.GpibError as error:
             status = self.__device.ibsta()
             if not (status & Gpib.TIMO):
                 # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
