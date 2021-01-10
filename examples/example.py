@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
-# Copyright (C) 2020  Patrick Baus
+# Copyright (C) 2021  Patrick Baus
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -32,14 +32,11 @@ gpib_device = AsyncGpib(name=0, pad=22)
 
 async def main():
     try: 
-        # Connect to the controller. This call must be done in the loop.
-        await gpib_device.connect()
-        version = await gpib_device.version()
-        print('Controller version: ', version)
+        print('Controller version:', await gpib_device.version())
     finally:
         # Disconnect from the GPIB controller. We may safely call diconnect() on a non-connected gpib device, even
         # in case of a connection error
         await gpib_device.disconnect()
 
-logging.basicConfig(level=logging.DEBUG)    # Enable logs from the ip connection. Set to logging.INFO for less verbose output
+logging.basicConfig(level=logging.DEBUG)    # Set to logging.INFO for less verbose output
 asyncio.run(main())
