@@ -140,4 +140,4 @@ class AsyncGpib:
         return await self.__wrapper(self.__device.timeout)
 
     async def version(self):
-        return gpib.version().lstrip().decode("utf-8")
+        return gpib.version().decode("utf-8")
