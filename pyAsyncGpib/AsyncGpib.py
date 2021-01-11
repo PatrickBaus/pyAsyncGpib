@@ -127,7 +127,7 @@ class AsyncGpib:
         return await self.__wrapper(self.__device.remote_enable, val)
 
     async def ibloc(self):
-        await self.__wrapper(self.__device.ibloc)
+        return await self.__wrapper(self.__device.ibloc)
 
     async def ibsta(self):
         return await self.__wrapper(self.__device.ibsta)
