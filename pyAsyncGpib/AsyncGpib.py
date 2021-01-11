@@ -116,6 +116,10 @@ class AsyncGpib:
 
     async def wait(self, mask):
         await self.__wrapper(self.__device.wait, mask)
+        # Check for timeout
+        ibsta = self.__wrapper(self.__device.ibsta)
+        if (ibsta & Gpib.TIMO)):
+            raise asyncio.TimeoutError("Timeout waiting for event.")
 
     async def serial_poll(self):
         return await self.__wrapper(self.__device.serial_poll)
