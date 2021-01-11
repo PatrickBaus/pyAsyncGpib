@@ -67,12 +67,13 @@ class AsyncGpib:
             return await asyncio.get_running_loop().run_in_executor(self.__threadpool, func, *args, **kwargs)
         except gpib.GpibError as error:
             status = self.__device.ibsta()
-            if not (status & Gpib.TIMO):
+            if status & Gpib.TIMO:
+                raise asyncio.TimeoutError() from None
+            else:
                 # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
                 self.__logger.error(error)
                 raise error from None
-            else:
-                raise asyncio.TimeoutError() from None
+
 
     async def close(self):
         await self.__wrapper(self.__device.close)
@@ -118,7 +119,7 @@ class AsyncGpib:
         await self.__wrapper(self.__device.wait, mask)
         # Check for timeout
         ibsta = self.__wrapper(self.__device.ibsta)
-        if (ibsta & Gpib.TIMO)):
+        if ibsta & Gpib.TIMO:
             raise asyncio.TimeoutError("Timeout waiting for event.")
 
     async def serial_poll(self):
