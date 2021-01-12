@@ -25,16 +25,6 @@ import logging
 import Gpib
 import gpib
 
-class Job:
-    def __init__(self, task, *args, **kwargs):
-        self.__task = task
-        self.__args = args
-        self.__kwargs = kwargs
-
-    def process(self, result_queue_sync):
-        result = self.__task(*self.__args, **self.__kwargs)
-        result_queue_sync.put(result)
-
 class AsyncGpib:
     @property
     def id(self):
