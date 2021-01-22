@@ -7,7 +7,7 @@ Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The li
 |Device|Supported|Tested|Comments|
 |--|--|--|--|
 |[Fluke 5440B](https://github.com/PatrickBaus/pyAsyncFluke5440B)|:heavy_check_mark:|:heavy_check_mark:|  |
-|[HP 3478A](https://github.com/PatrickBaus/pyAsyncHP3478A)|:heavy_check_mark:|:x:|Needs testing
+|[HP 3478A](https://github.com/PatrickBaus/pyAsyncHP3478A)|:heavy_check_mark:|:heavy_check_mark:|  |
 
 ## Setup
 There are currently no packages available. Neither for this library nor Linux GPIB. To install the library, clone the repository into your project folder and install the required packages and also install Linux GPIB.
