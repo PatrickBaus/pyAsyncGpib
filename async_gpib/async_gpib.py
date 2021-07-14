@@ -27,19 +27,20 @@ import gpib
 
 class AsyncGpib:
     @property
-    def id(self):
+    def id(self):   # pylint: disable=invalid-name
         return self.__device.id
 
     def __repr__(self):
         return repr(self.__device)
 
-    """
-    name: Either e.g. "gpib0" (string) or 0 (integer)
-    pad: primary address
-    """
-    def __init__(self, name = 'gpib0', pad = None, sad = 0, timeout = 13, send_eoi = 1, eos_mode = 0):
+    def __init__(self, name='gpib0', pad=None, sad=0, timeout=13, send_eoi=1, eos_mode=0):
+        """
+        name: Either e.g. "gpib0" (string) or 0 (integer)
+        pad: primary address
+        sad: secondary address, typically 0
+        """
         self.__device = Gpib.Gpib(name, pad, sad, timeout, send_eoi, eos_mode)
-        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
+        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)    # pylint: disable=consider-using-with
 
         self.__logger = logging.getLogger(__name__)
 
@@ -59,10 +60,10 @@ class AsyncGpib:
             status = self.__device.ibsta()
             if status & Gpib.TIMO:
                 raise asyncio.TimeoutError() from None
-            else:
-                # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
-                self.__logger.error(error)
-                raise error from None
+
+            # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
+            self.__logger.error(error)
+            raise error from None
 
 
     async def close(self):
@@ -75,20 +76,20 @@ class AsyncGpib:
 
         self.__logger.info("GPIB connection shut down.")
 
-    async def command(self, str):
+    async def command(self, str):   # pylint: disable=redefined-builtin
         await self.__wrapper(self.__device.command, str)
 
     async def config(self, option, value):
         return await self.__wrapper(self.__device.config, option, value)
 
     async def interface_clear(self):
-       await self.__wrapper(self.__device.interface_clear)
+        await self.__wrapper(self.__device.interface_clear)
 
     async def write(self, command):
         self.__logger.debug('Writing data: %(payload)s', {'payload': command})
         await self.__wrapper(self.__device.write, command)
 
-    async def read(self, len=512):
+    async def read(self, len=512):  # pylint: disable=redefined-builtin
         result = await self.__wrapper(self.__device.read, len)
         self.__logger.debug("Data read: %(data)s", {'data': result})
         return result
@@ -130,7 +131,7 @@ class AsyncGpib:
     async def ibcnt(self):
         return await self.__wrapper(self.__device.ibcnt)
 
-    async def timeout(self, value):
+    async def timeout(self, value): # pylint: disable=unused-argument
         return await self.__wrapper(self.__device.timeout)
 
     async def version(self):

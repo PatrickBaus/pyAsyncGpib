@@ -22,10 +22,8 @@ import asyncio
 import logging
 import sys
 
-sys.path.append("..") # Adds main directory to python modules path.
-
 # Devices
-from pyAsyncGpib.AsyncGpib import AsyncGpib
+from async_gpib.async_gpib import AsyncGpib
 
 # The primary address (e.g. 22) can be anything. There is no device connection required for this example
 gpib_device = AsyncGpib(name=0, pad=22)
