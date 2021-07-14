@@ -22,8 +22,12 @@ import concurrent.futures
 import logging
 
 # AsyncGpib
-import Gpib
-import gpib
+try:
+    import Gpib
+    import gpib
+except ModuleNotFoundError:
+    from gpib_ctypes import Gpib
+    from gpib_ctypes import gpib
 
 class AsyncGpib:
     @property

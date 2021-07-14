@@ -5,7 +5,7 @@ with open('README.md', 'r') as f:
 
 setup(
    name='async_gpib',
-   version='1.0.0',
+   version='1.0.1',
    author='Patrick Baus',
    author_email='patrick.baus@physik.tu-darmstadt.de',
    url='https://github.com/PatrickBaus/pyAsyncGpib',
@@ -23,5 +23,8 @@ setup(
    license='GPL',
    license_files=('LICENSE',),
    packages=['async_gpib'],  # same as name
-   install_requires=['gpib-ctypes',],  # external packages as dependencies
+   install_requires=[],  # external packages as dependencies
+   extras_require={
+        'GPIB':  ['gpib-ctypes>=0.3',],
+    }
 )
