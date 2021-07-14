@@ -1,4 +1,4 @@
-# pyAsyncGpib
+# async_gpib
 Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper library.
 
 ## Supported Devices
@@ -10,7 +10,7 @@ Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The li
 |[HP 3478A](https://github.com/PatrickBaus/pyAsyncHP3478A)|:heavy_check_mark:|:heavy_check_mark:|  |
 
 ## Setup
-There are currently no packages available. Neither for this library nor Linux GPIB. To install the library, clone the repository into your project folder and install the required packages and also install Linux GPIB.
+There are currently no packages for Linux GPIB available on all platforms. To install the library it is required to install Linux GPIB.
 
 ### Linux GPIB:
 These instructions are for Ubuntu:
@@ -30,17 +30,26 @@ sudo make install
 sudo ldconfig
 ```
 
-### Python module:
+### Linux GPIB Python module:
+Once Linux GPIB is installed, you can either install the python package or use the `gpib-ctypes` package.
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
 pip install -e ~/linux-gpib-code/linux-gpib-user/language/python/
 ```
 
+### async_gpib Python module
+There is an install script available to make installation simple
+```bash
+python3 -m venv env  # virtual environment, optional
+source env/bin/activate
+pip python3 setup.py install
+```
+
 ## Usage
 Initialize the GPIB adapter
 ```python
-from pyAsyncGpib.AsyncGpib import AsyncGpib
+from async_gpib.async_gpib import AsyncGpib
 # Create a controller and talk to device address 22
 gpib_device = AsyncGpib(name=0, pad=22)
 
