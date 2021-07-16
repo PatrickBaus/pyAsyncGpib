@@ -43,7 +43,7 @@ There is an install script available to make installation simple
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
-pip python3 setup.py install
+python3 setup.py install
 ```
 
 ## Usage
