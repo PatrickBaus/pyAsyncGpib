@@ -39,7 +39,7 @@ pip install -e ~/linux-gpib-code/linux-gpib-user/language/python/
 ```
 
 ### async_gpib Python module
-There is an install script available to make installation simple
+There is an install script available to simplify installation.
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
