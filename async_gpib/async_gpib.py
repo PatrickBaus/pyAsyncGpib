@@ -21,7 +21,7 @@ import asyncio
 import concurrent.futures
 import logging
 
-# AsyncGpib
+# Import either the Linux GPIB module or gpib_ctypes
 try:
     import Gpib
     import gpib
@@ -29,7 +29,7 @@ except ModuleNotFoundError:
     from gpib_ctypes import Gpib
     from gpib_ctypes import gpib
 
-class AsyncGpib:
+class AsyncGpib:    # pylint: disable=too-many-public-methods
     @property
     def id(self):   # pylint: disable=invalid-name
         return self.__device.id
@@ -37,7 +37,7 @@ class AsyncGpib:
     def __repr__(self):
         return repr(self.__device)
 
-    def __init__(self, name='gpib0', pad=None, sad=0, timeout=13, send_eoi=1, eos_mode=0):
+    def __init__(self, name="gpib0", pad=None, sad=0, timeout=13, send_eoi=1, eos_mode=0):  # pylint: disable=too-many-arguments
         """
         name: Either e.g. "gpib0" (string) or 0 (integer)
         pad: primary address
@@ -90,7 +90,7 @@ class AsyncGpib:
         await self.__wrapper(self.__device.interface_clear)
 
     async def write(self, command):
-        self.__logger.debug('Writing data: %(payload)s', {'payload': command})
+        self.__logger.debug("Writing data: %(payload)s", {'payload': command})
         await self.__wrapper(self.__device.write, command)
 
     async def read(self, len=512):  # pylint: disable=redefined-builtin
