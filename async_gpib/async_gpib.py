@@ -15,6 +15,34 @@ except ModuleNotFoundError:
     from gpib_ctypes import Gpib
     from gpib_ctypes import gpib
 
+TIMEOUT_VALUES = {
+    gpib.T10us: 10e-6,
+    gpib.T30us: 30e-6,
+    gpib.T100us: 100e-6,
+    gpib.T300us: 300e-6,
+    gpib.T1ms: 1e-3,
+    gpib.T3ms: 3e-3,
+    gpib.T10ms: 10e-3,
+    gpib.T30ms: 30e-3,
+    gpib.T100ms: 100e-3,
+    gpib.T300ms: 300e-3,
+    gpib.T1s: 1.0,
+    gpib.T3s: 3.0,
+    gpib.T10s: 10.0,
+    gpib.T30s: 30.0,
+    gpib.T100s: 100.0,
+    gpib.T300s: 300.0,
+    gpib.T1000s: 1000.0,
+}
+
+def caluclate_timeout_value(timeout):
+    if timeout is None:
+        return gpib.TNONE
+    for key, value in TIMEOUT_VALUES.items():
+        if value >= timeout
+            return key
+    return gpib.T1000s
+
 class AsyncGpib:    # pylint: disable=too-many-public-methods
     """
     A thin wrapper class, that uses a threadpool to execute the blocking gpib libarary calls.
@@ -33,7 +61,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
     def __repr__(self):
         return repr(self.__device)
 
-    def __init__(self, name="gpib0", pad=None, sad=gpib.NO_SAD, timeout=gpib.T10s, send_eoi=1, eos_mode=0):  # pylint: disable=too-many-arguments
+    def __init__(self, name="gpib0", pad=None, sad=gpib.NO_SAD, timeout=10.0, send_eoi=1, eos_mode=0):  # pylint: disable=too-many-arguments
         """
         Parameters
         ----------
@@ -44,14 +72,14 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
             primary address, must only be specified when creating a device obeject
         sad: int, default=gpib.NO_SAD
             secondary address, must only be specified when creating a device obeject
-        timeout: {TNONE, T10us, T30us, T100us, T300us, T1ms, T3ms, T10ms, T30ms, T100ms, T300ms, T1s, T3s, T10s, T30s, T100s, T300s, T1000s}, default=gpib.T10s
-            timeout
+        timeout: float or None, default=10.0
+            timeout in seconds
         send_eoi: int, default=1
             assert EOI on write if non-zero, default 1
         eos_mode: int, default=0
             end-of-string termination, default 0
         """
-        self.__device = Gpib.Gpib(name, pad, sad, timeout, send_eoi, eos_mode)
+        self.__device = Gpib.Gpib(name, pad, sad, caluclate_timeout_value(timeout), send_eoi, eos_mode)
         self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)    # pylint: disable=consider-using-with
 
         self.__logger = logging.getLogger(__name__)
@@ -303,7 +331,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
 
     async def remote_enable(self, enable):
         """
-        Query configuration by calling ibask.
+        Set remote enable by calling ibsre.
 
         Parameters
         ----------
@@ -371,8 +399,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
 
         Parameters
         ----------
-        value: {TNONE, T10us, T30us, T100us, T300us, T1ms, T3ms, T10ms, T30ms, T100ms, T300ms, T1s, T3s, T10s, T30s, T100s, T300s, T1000s}
-            timeout, one of constants from gpib.TNONE to gpib.T100s
+        value: float or None
+            timeout in seconds, it will be converted to one of the constants {TNONE, T10us, T30us, T100us, T300us, T1ms, T3ms, T10ms, T30ms, T100ms, T300ms, T1s, T3s, T10s, T30s, T100s, T300s, T1000s}
 
         Returns
         -------
@@ -384,7 +412,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
-        return await self.__wrapper(self.__device.timeout, value)
+        return await self.__wrapper(self.__device.timeout, caluclate_timeout_value(value))
 
     async def version(self):
         """
