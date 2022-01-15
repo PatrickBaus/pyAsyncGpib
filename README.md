@@ -45,6 +45,12 @@ python3 -m venv env  # virtual environment, optional
 source env/bin/activate
 python3 setup.py install
 ```
+alternatively the package can be directly installed via pip:
+```bash
+python3 -m venv env  # virtual environment, optional
+source env/bin/activate
+pip install -e git+https://github.com/PatrickBaus/pyAsyncGpib#egg=async_gpib
+```
 
 ## Usage
 Initialize the GPIB adapter
