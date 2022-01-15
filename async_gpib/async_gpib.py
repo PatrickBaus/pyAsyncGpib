@@ -39,7 +39,7 @@ def caluclate_timeout_value(timeout):
     if timeout is None:
         return gpib.TNONE
     for key, value in TIMEOUT_VALUES.items():
-        if value >= timeout
+        if value >= timeout:
             return key
     return gpib.T1000s
 
