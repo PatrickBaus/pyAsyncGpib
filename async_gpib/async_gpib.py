@@ -216,7 +216,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         self.__logger.debufg("Data read: %s", result)
         return result
 
-    async def listener(self, pad, sad=gpib.NO_SAD):
+    async def listener(self, pad, sad=0):
         """
         Check if a listener is present at address by calling ibln.
 
@@ -225,7 +225,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         pad: int
             primary address
         sad: int, optional
-            secondary address, default gpib.NO_SAD
+            secondary address, default 0
 
         Returns
         -------
