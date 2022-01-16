@@ -213,7 +213,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         asyncio.TimeoutError
         """
         result = await self.__wrapper(self.__device.read, length)
-        self.__logger.debufg("Data read: %s", result)
+        self.__logger.debug("Data read: %s", result)
         return result
 
     async def listener(self, pad, sad=0):
