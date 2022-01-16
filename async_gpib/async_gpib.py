@@ -61,7 +61,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
     def __repr__(self):
         return repr(self.__device)
 
-    def __init__(self, name="gpib0", pad=None, sad=gpib.NO_SAD, timeout=10.0, send_eoi=1, eos_mode=0):  # pylint: disable=too-many-arguments
+    def __init__(self, name="gpib0", pad=None, sad=0, timeout=10.0, send_eoi=1, eos_mode=0):  # pylint: disable=too-many-arguments
         """
         Parameters
         ----------
@@ -70,7 +70,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
             device object (name=0, pad=....)
         pad: int, default=None
             primary address, must only be specified when creating a device obeject
-        sad: int, default=gpib.NO_SAD
+        sad: int, default=0
             secondary address, must only be specified when creating a device obeject
         timeout: float or None, default=10.0
             timeout in seconds
