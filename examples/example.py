@@ -29,12 +29,8 @@ gpib_device = AsyncGpib(name=0, pad=22)
 
 
 async def main():
-    try:
+    async with gpib_device:
         print("Controller version:", await gpib_device.version())
-    finally:
-        # Disconnect from the GPIB controller. We may safely call disconnect() on a non-connected gpib device, even
-        # in case of a connection error
-        await gpib_device.disconnect()
 
 logging.basicConfig(level=logging.DEBUG)    # Set to logging.INFO for less verbose output
 asyncio.run(main())

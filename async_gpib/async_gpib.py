@@ -220,7 +220,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         self.__logger.debug("Writing data: %s", command)
         await self.__wrapper(self.__device.write, command)
 
-    async def read(self, length: int = 512) -> bytes:
+    async def read(self, length: int = 512, character: str = None) -> bytes:
         """
         Read a number of data bytes by calling ibread.
 
