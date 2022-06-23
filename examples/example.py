@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 # Copyright (C) 2021  Patrick Baus
@@ -28,11 +27,12 @@ from async_gpib.async_gpib import AsyncGpib
 # The primary address (e.g. 22) can be anything. There is no device connection required for this example
 gpib_device = AsyncGpib(name=0, pad=22)
 
+
 async def main():
     try:
         print("Controller version:", await gpib_device.version())
     finally:
-        # Disconnect from the GPIB controller. We may safely call diconnect() on a non-connected gpib device, even
+        # Disconnect from the GPIB controller. We may safely call disconnect() on a non-connected gpib device, even
         # in case of a connection error
         await gpib_device.disconnect()
 

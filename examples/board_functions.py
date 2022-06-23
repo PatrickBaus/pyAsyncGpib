@@ -1,5 +1,4 @@
 #!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 # ##### BEGIN GPL LICENSE BLOCK #####
 #
 # Copyright (C) 2021  Patrick Baus
@@ -20,7 +19,6 @@
 
 import asyncio
 import logging
-import sys
 
 # Devices
 from async_gpib.async_gpib import AsyncGpib
@@ -28,6 +26,7 @@ from async_gpib.async_gpib import AsyncGpib
 # The primary address (e.g. 22) can be anything. There is no device connection required for this example
 gpib_device = AsyncGpib(name=0, pad=22)
 gpib_board = AsyncGpib(name=0)    # The controller board, *not* a device
+
 
 async def main():
     try:
@@ -38,7 +37,7 @@ async def main():
         # or alternatively
         # await gpib_device.ibloc()
     finally:
-        # Disconnect from the GPIB controller. We may safely call diconnect() on a non-connected gpib device, even
+        # Disconnect from the GPIB controller. We may safely call disconnect() on a non-connected gpib device, even
         # in case of a connection error
         await gpib_device.disconnect()
 
