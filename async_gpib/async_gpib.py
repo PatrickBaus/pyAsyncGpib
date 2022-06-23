@@ -8,6 +8,12 @@ import concurrent.futures
 import logging
 
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
+from types import TracebackType
+try:
+    from typing import Self  # Python >=3.11
+except ImportError:
+    from typing_extensions import Self
+
 try:
     import Gpib
     import gpib
@@ -93,6 +99,18 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)  # pylint: disable=consider-using-with
 
         self.__logger = logging.getLogger(__name__)
+        self.__logger.setLevel(logging.WARNING)  # Only log really important messages
+
+    async def __aenter__(self) -> Self:
+        return self
+
+    async def __aexit__(
+            self,
+            exc_type: Type[BaseException] | None,
+            exc: BaseException | None,
+            traceback: TracebackType | None
+    ) -> None:
+        await self.disconnect()
 
     async def connect(self) -> None:
         """
