@@ -8,7 +8,9 @@ import concurrent.futures
 import logging
 
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
+from enum import Flag, unique
 from types import TracebackType
+from typing import Type
 try:
     from typing import Self  # Python >=3.11
 except ImportError:
@@ -42,6 +44,17 @@ TIMEOUT_VALUES = {
 }
 
 
+@unique
+class EosType(Flag):
+    """
+    The bitmask used, for setting the end-of-string mode.
+    """
+    NONE = 0
+    REOS = (1 << 10)  # Enable termination of reads, when the EOS character is received
+    XEOS = (1 << 11)  # Assert the EOI line, whenever the EOS character is sent during write
+    BIN = (1 << 12)  # Match the EOS character against all 8 bits and not just the 7 least significant bits
+
+
 def _calculate_timeout_value(timeout: float | None):
     if timeout is None:
         return gpib.TNONE
@@ -56,27 +69,48 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
     A thin wrapper class, that uses a threadpool to execute the blocking gpib library calls.
     """
     @property
-    def id(self) -> int:   # pylint: disable=invalid-name
+    def id(self) -> int | str:   # pylint: disable=invalid-name
         """
         The device handle.
         Returns
         -------
-        int
-            device handle retrieved from calling ibfind.
+        int or str
+            The device name as given to ibfind().
         """
-        return self.__device.id
+        return self.__name
 
-    def __repr__(self) -> str:
-        return repr(self.__device)
+    @property
+    def pad(self) -> int:
+        """
+        Returns
+        -------
+        int
+            The device primary address
+        """
+        return self.__pad
+
+    @property
+    def sad(self) -> int:
+        """
+        Returns
+        -------
+        int
+            The device secondary address
+        """
+        return self.__sad
+
+    def __str__(self) -> str:
+        return f"Linux-GPIB at Gpib({self.__name})"
 
     def __init__(
             self,
-            name: str | int = "gpib0",
+            name: int | str = "gpib0",
             pad: int | None = None,
             sad: int = 0,
             timeout: float | None = 10.0,
             send_eoi: bool = True,
-            eos_mode: int = 0
+            eos_mode: EosType = EosType.NONE,
+            eos_character: bytes | None = None
     ) -> None:  # pylint: disable=too-many-arguments
         """
         Parameters
@@ -92,16 +126,22 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
             timeout in seconds
         send_eoi: bool, default=1
             assert EOI on write if non-zero, default True
-        eos_mode: int, default=0
-            end-of-string termination character, default 0
+        eos_mode: int, optional
+            end-of-string termination character
         """
-        self.__device = Gpib.Gpib(name, pad, sad, _calculate_timeout_value(timeout), bool(send_eoi), eos_mode)
-        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)  # pylint: disable=consider-using-with
+        eos_character = eos_character if eos_character is not None else b'\0'
+        self.__name = name
+        self.__pad = pad
+        self.__sad = sad
+        self.__timeout = _calculate_timeout_value(timeout)
+        self.__send_eoi = bool(send_eoi)
+        self.__eos_mode = ord(eos_character) | eos_mode.value
 
         self.__logger = logging.getLogger(__name__)
         self.__logger.setLevel(logging.WARNING)  # Only log really important messages
 
     async def __aenter__(self) -> Self:
+        await self.connect()
         return self
 
     async def __aexit__(
@@ -117,6 +157,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         Calling connect() does nothing, but is here for compatibility with other transports that
         require a connection.
         """
+        self.__device = Gpib.Gpib(self.__name, self.__pad, self.__sad, self.__timeout, self.__send_eoi, self.__eos_mode)
+        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)  # pylint: disable=consider-using-with
 
     async def disconnect(self) -> None:
         """
@@ -136,8 +178,6 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
             if status & Gpib.TIMO:
                 raise asyncio.TimeoutError() from None
 
-            # Do not log timeouts, a timeout is normal on the GPIB bus, if commands are invalid
-            self.__logger.error(error)
             raise error from None
 
     async def close(self) -> None:
@@ -150,6 +190,9 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         except TypeError:
             # Python < 3.9.0
             self.__threadpool.shutdown(wait=True)
+        finally:
+            self.__device = None
+            self.__threadpool = None
 
         self.__logger.info("GPIB connection shut down.")
 
@@ -220,7 +263,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         self.__logger.debug("Writing data: %s", command)
         await self.__wrapper(self.__device.write, command)
 
-    async def read(self, length: int = 512, character: str = None) -> bytes:
+    async def read(self, length: int = 512) -> bytes:
         """
         Read a number of data bytes by calling ibread.
 
