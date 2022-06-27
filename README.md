@@ -39,7 +39,7 @@ pip install -e ~/linux-gpib-code/linux-gpib-user/language/python/
 ```
 
 ### async_gpib Python module
-If you have cloned the repository, there is a install script available to install the package from the source.
+If you have cloned the repository, there is a script available to install the package from the source.
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
@@ -58,6 +58,7 @@ Initialize the GPIB adapter
 from async_gpib.async_gpib import AsyncGpib
 # Create a controller and talk to device address 22
 async with AsyncGpib(name=0, pad=22) as gpib_device:
+    # Add your code here
     ...
 ```
 See [examples/](examples/) for more working examples.
@@ -70,7 +71,7 @@ See [examples/](examples/) for more working examples.
 I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/PatrickBaus/pyAsyncPrologix/tags). 
 
 ## Documentation
-I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style for documentaion.
+I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style for documentation.
 
 ## Authors
 
