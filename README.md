@@ -57,15 +57,8 @@ Initialize the GPIB adapter
 ```python
 from async_gpib.async_gpib import AsyncGpib
 # Create a controller and talk to device address 22
-gpib_device = AsyncGpib(name=0, pad=22)
-
-# Connect to the controller. This must be done inside the loop
-await gpib_device.connect()
-
-# Add your code here
-
-# Disconnect after we are done
-await gpib_device.disconnect()
+async with AsyncGpib(name=0, pad=22) as gpib_device:
+    ...
 ```
 See [examples/](examples/) for more working examples.
 
@@ -87,4 +80,3 @@ I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) styl
 
 
 This project is licensed under the GPL v3 license - see the [LICENSE](LICENSE) file for details
-
