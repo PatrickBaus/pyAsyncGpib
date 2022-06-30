@@ -102,7 +102,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
     def __str__(self) -> str:
         return f"Linux-GPIB at Gpib({self.__name})"
 
-    def __init__(
+    def __init__(  # pylint: disable=too-many-arguments
             self,
             name: int | str = "gpib0",
             pad: int | None = None,
@@ -111,7 +111,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
             send_eoi: bool = True,
             eos_mode: EosType = EosType.NONE,
             eos_character: bytes | None = None
-    ) -> None:  # pylint: disable=too-many-arguments
+    ) -> None:
         """
         Parameters
         ----------
@@ -136,6 +136,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         self.__timeout = _calculate_timeout_value(timeout)
         self.__send_eoi = bool(send_eoi)
         self.__eos_mode = ord(eos_character) | eos_mode.value
+        self.__device: Gpib.Gpib | None = None
+        self.__threadpool: concurrent.futures.ThreadPoolExecutor | None = None
 
         self.__logger = logging.getLogger(__name__)
         self.__logger.setLevel(logging.WARNING)  # Only log really important messages
@@ -158,7 +160,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         require a connection.
         """
         self.__device = Gpib.Gpib(self.__name, self.__pad, self.__sad, self.__timeout, self.__send_eoi, self.__eos_mode)
-        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)  # pylint: disable=consider-using-with
+        self.__threadpool = concurrent.futures.ThreadPoolExecutor(max_workers=1)
 
     async def disconnect(self) -> None:
         """
