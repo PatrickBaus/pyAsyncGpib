@@ -1,7 +1,7 @@
 [![pylint](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml/badge.svg)](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml)
-[![PyPI](https://img.shields.io/pypi/v/async_gpib)](https://pypi.org/project/async_gpib/)
-![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async_gpib)
-![PyPI - Status](https://img.shields.io/pypi/status/async_gpib)
+[![PyPI](https://img.shields.io/pypi/v/async-gpib)](https://pypi.org/project/async-gpib/)
+![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-gpib)
+![PyPI - Status](https://img.shields.io/pypi/status/async-gpib)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # async_gpib
 Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper library.
@@ -50,7 +50,7 @@ The package can be directly installed via Pypi:
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
-pip install async_gpib
+pip install async-gpib
 ```
 
 ## Usage
