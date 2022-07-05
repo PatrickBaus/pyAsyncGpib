@@ -3,6 +3,8 @@
 # async_gpib
 Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper library.
 
+The library is fully type-hinted.
+
 ## Supported Devices
 
 ### Instruments
