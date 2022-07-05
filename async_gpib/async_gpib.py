@@ -10,9 +10,10 @@ import logging
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
 from enum import Flag, unique
 from types import TracebackType
-from typing import Type
+from typing import Any, Callable, Type
+
 try:
-    from typing import Self  # Python >=3.11
+    from typing import Self  # type: ignore # Python 3.11
 except ImportError:
     from typing_extensions import Self
 
@@ -20,8 +21,7 @@ try:
     import Gpib
     import gpib
 except ModuleNotFoundError:
-    from gpib_ctypes import Gpib
-    from gpib_ctypes import gpib
+    from gpib_ctypes import Gpib, gpib
 
 TIMEOUT_VALUES = {
     gpib.T10us: 10e-6,
@@ -49,10 +49,11 @@ class EosType(Flag):
     """
     The bitmask used, for setting the end-of-string mode.
     """
+
     NONE = 0
-    REOS = (1 << 10)  # Enable termination of reads, when the EOS character is received
-    XEOS = (1 << 11)  # Assert the EOI line, whenever the EOS character is sent during write
-    BIN = (1 << 12)  # Match the EOS character against all 8 bits and not just the 7 least significant bits
+    REOS = 1 << 10  # Enable termination of reads, when the EOS character is received
+    XEOS = 1 << 11  # Assert the EOI line, whenever the EOS character is sent during write
+    BIN = 1 << 12  # Match the EOS character against all 8 bits and not just the 7 least significant bits
 
 
 def _calculate_timeout_value(timeout: float | None):
@@ -64,12 +65,13 @@ def _calculate_timeout_value(timeout: float | None):
     return gpib.T1000s
 
 
-class AsyncGpib:    # pylint: disable=too-many-public-methods
+class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-attributes  # This is just a wrapper
     """
     A thin wrapper class, that uses a threadpool to execute the blocking gpib library calls.
     """
+
     @property
-    def id(self) -> int | str:   # pylint: disable=invalid-name
+    def id(self) -> int | str:  # pylint: disable=invalid-name
         """
         The device handle.
         Returns
@@ -80,7 +82,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         return self.__name
 
     @property
-    def pad(self) -> int:
+    def pad(self) -> int | None:
         """
         Returns
         -------
@@ -103,14 +105,14 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         return f"Linux-GPIB at Gpib({self.__name})"
 
     def __init__(  # pylint: disable=too-many-arguments
-            self,
-            name: int | str = "gpib0",
-            pad: int | None = None,
-            sad: int = 0,
-            timeout: float | None = 10.0,
-            send_eoi: bool = True,
-            eos_mode: EosType = EosType.NONE,
-            eos_character: bytes | None = None
+        self,
+        name: int | str = "gpib0",
+        pad: int | None = None,
+        sad: int = 0,
+        timeout: float | None = 10.0,
+        send_eoi: bool = True,
+        eos_mode: EosType = EosType.NONE,
+        eos_character: bytes | None = None,
     ) -> None:
         """
         Parameters
@@ -129,7 +131,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         eos_mode: int, optional
             end-of-string termination character
         """
-        eos_character = eos_character if eos_character is not None else b'\0'
+        eos_character = eos_character if eos_character is not None else b"\0"
         self.__name = name
         self.__pad = pad
         self.__sad = sad
@@ -147,10 +149,7 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         return self
 
     async def __aexit__(
-            self,
-            exc_type: Type[BaseException] | None,
-            exc: BaseException | None,
-            traceback: TracebackType | None
+        self, exc_type: Type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
     ) -> None:
         await self.disconnect()
 
@@ -168,11 +167,13 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         """
         await self.close()
 
-    async def __wrapper(self, func, *args):
+    async def __wrapper(self, func: Callable, *args: Any) -> Any:
         """
         This is the actual wrapper, that runs the threaded Linux GPIB lib in the executor and
         returns a future to wait for.
         """
+        assert self.__device is not None
+
         try:
             return await asyncio.get_running_loop().run_in_executor(self.__threadpool, func, *args)
         except gpib.GpibError as error:
@@ -186,6 +187,9 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         """
         Close the board or device handle by calling ibonl.
         """
+        assert self.__device is not None
+        assert self.__threadpool is not None
+
         await self.__wrapper(self.__device.close)
         try:
             self.__threadpool.shutdown(wait=True, cancel_futures=True)
@@ -212,6 +216,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.command, cmd)
 
     async def config(self, option: int, value: int) -> int:
@@ -235,6 +241,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.config, option, value)
 
     async def interface_clear(self) -> None:
@@ -246,6 +254,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.interface_clear)
 
     async def write(self, command: bytes) -> None:
@@ -262,6 +272,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         self.__logger.debug("Writing data: %s", command)
         await self.__wrapper(self.__device.write, command)
 
@@ -284,6 +296,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         result = await self.__wrapper(self.__device.read, length)
         self.__logger.debug("Data read: %s", result)
         return result
@@ -309,6 +323,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.listener, pad, sad)
 
     async def lines(self) -> int:
@@ -325,6 +341,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.lines)
 
     async def ask(self, option: int) -> int:
@@ -346,12 +364,16 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.ask, option)
 
     async def clear(self) -> None:
         """
         Clear device by calling ibclr.
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.clear)
 
     async def wait(self, eventmask: int) -> None:
@@ -368,6 +390,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.wait, eventmask)
         # Check for timeout
         ibsta = await self.__wrapper(self.__device.ibsta)
@@ -388,6 +412,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.serial_poll)
 
     async def trigger(self) -> None:
@@ -399,6 +425,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.trigger)
 
     async def remote_enable(self, enable: bool) -> None:
@@ -415,6 +443,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         await self.__wrapper(self.__device.remote_enable, bool(enable))
 
     async def ibloc(self) -> int:
@@ -431,6 +461,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.ibloc)
 
     async def ibsta(self) -> int:
@@ -447,6 +479,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.ibsta)
 
     async def ibcnt(self) -> int:
@@ -463,6 +497,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.ibcnt)
 
     async def timeout(self, value: float | None) -> int:
@@ -486,6 +522,8 @@ class AsyncGpib:    # pylint: disable=too-many-public-methods
         gpib.GpibError
         asyncio.TimeoutError
         """
+        assert self.__device is not None
+
         return await self.__wrapper(self.__device.timeout, _calculate_timeout_value(value))
 
     @staticmethod

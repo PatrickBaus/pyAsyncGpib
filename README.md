@@ -1,3 +1,5 @@
+[![pylint](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml/badge.svg)](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml)
+[![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # async_gpib
 Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper library.
 
@@ -43,7 +45,7 @@ If you have cloned the repository, there is a script available to install the pa
 ```bash
 python3 -m venv env  # virtual environment, optional
 source env/bin/activate
-python3 setup.py install
+python3 pip install .
 ```
 Alternatively the package can be directly installed via pip:
 ```bash
@@ -55,7 +57,7 @@ pip install -e git+https://github.com/PatrickBaus/pyAsyncGpib#egg=async_gpib
 ## Usage
 Initialize the GPIB adapter
 ```python
-from async_gpib.async_gpib import AsyncGpib
+from async_gpib import AsyncGpib
 # Create a controller and talk to device address 22
 async with AsyncGpib(name=0, pad=22) as gpib_device:
     # Add your code here

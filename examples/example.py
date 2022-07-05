@@ -16,21 +16,25 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ##### END GPL LICENSE BLOCK #####
+"""A simple example to demonstrate operating a single SCPI device via the linux-gpib wrapper."""
 
 import asyncio
 import logging
-import sys
 
 # Devices
-from async_gpib.async_gpib import AsyncGpib
+from async_gpib import AsyncGpib
 
 # The primary address (e.g. 22) can be anything. There is no device connection required for this example
-gpib_device = AsyncGpib(name=0, pad=22)
+gpib_device = AsyncGpib(name=0, pad=21)
 
 
 async def main():
+    """This example will print ID of the attached SCPI device"""
     async with gpib_device:
         print("Controller version:", await gpib_device.version())
+        await gpib_device.write(b"*IDN?")
+        print("Device id:", await gpib_device.read())
 
-logging.basicConfig(level=logging.DEBUG)    # Set to logging.INFO for less verbose output
+
+logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
 asyncio.run(main())

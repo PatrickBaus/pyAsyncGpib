@@ -16,22 +16,24 @@
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #
 # ##### END GPL LICENSE BLOCK #####
+"""An example demonstrating the GPIB board (controller) settings."""
 
 import asyncio
 import logging
 
 # Devices
-from async_gpib.async_gpib import AsyncGpib
+from async_gpib import AsyncGpib
 
 # The primary address (e.g. 22) can be anything. There is no device connection required for this example
 gpib_device = AsyncGpib(name=0, pad=22)
-gpib_board = AsyncGpib(name=0)    # The controller board, *not* a device
+gpib_board = AsyncGpib(name=0)  # The controller board, *not* a device
 
 
 async def main():
+    """Send a local lockout to all devices, wait for 5 seconds, then reactive them."""
     try:
         # Enable local lockout
-        await gpib_board.remote_enable(True)    # The remote_enable() call only works with GPIB boards
+        await gpib_board.remote_enable(True)  # The remote_enable() call only works with GPIB boards
         await asyncio.sleep(5.0)
         await gpib_board.remote_enable(False)
         # or alternatively
@@ -41,5 +43,6 @@ async def main():
         # in case of a connection error
         await gpib_device.disconnect()
 
-logging.basicConfig(level=logging.DEBUG)    # Set to logging.INFO for less verbose output
+
+logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
 asyncio.run(main())
