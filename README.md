@@ -4,7 +4,9 @@
 ![PyPI - Status](https://img.shields.io/pypi/status/async-gpib)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # async_gpib
-Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper library.
+Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python
+[asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper
+library.
 
 The library is fully type-hinted.
 
@@ -17,7 +19,8 @@ The library is fully type-hinted.
 |[HP 3478A](https://github.com/PatrickBaus/pyAsyncHP3478A)|:heavy_check_mark:|:heavy_check_mark:|  |
 
 ## Setup
-There are currently no packages for Linux GPIB available on all platforms. To install the library it is required to install Linux GPIB.
+There are currently no packages for Linux GPIB available on all platforms. To install the library it is required to
+install Linux GPIB.
 
 ### Linux GPIB:
 These instructions are for Ubuntu:
@@ -57,6 +60,7 @@ pip install async-gpib
 Initialize the GPIB adapter
 ```python
 from async_gpib import AsyncGpib
+
 # Create a controller and talk to device address 22
 async with AsyncGpib(name=0, pad=22) as gpib_device:
     # Add your code here
@@ -65,20 +69,19 @@ async with AsyncGpib(name=0, pad=22) as gpib_device:
 See [examples/](examples/) for more working examples.
 
 ## Support for Multiple Devices
-> :warning: **Concurrency with multiple devices**: Note, that when using a single adapter to control multiple devices, there is no concurrency on the GPIB bus. This means, there is **no** speed increase, when making asynchronous reads from multiple devices on the bus regarding the transfer time.
+> :warning: **Concurrency with multiple devices**: Note, that when using a single adapter to control multiple devices,
+> there is no concurrency on the GPIB bus. This means, there is **no** speed increase, when making asynchronous reads
+> from multiple devices on the bus regarding the transfer time.
 
 ## Versioning
-
-I use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/PatrickBaus/pyAsyncPrologix/tags). 
+I use [SemVer](http://semver.org/) for versioning. For the versions available, see the
+[tags on this repository](https://github.com/PatrickBaus/pyAsyncPrologix/tags). 
 
 ## Documentation
 I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style for documentation.
 
 ## Authors
-
 * **Patrick Baus** - *Initial work* - [PatrickBaus](https://github.com/PatrickBaus)
 
 ## License
-
-
 This project is licensed under the GPL v3 license - see the [LICENSE](LICENSE) file for details
