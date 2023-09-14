@@ -1,10 +1,10 @@
-[![pylint](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml/badge.svg)](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml)
+[![pylint](../../actions/workflows/pylint.yml/badge.svg)](../../actions/workflows/pylint.yml)
 [![PyPI](https://img.shields.io/pypi/v/async-gpib)](https://pypi.org/project/async-gpib/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-gpib)
 ![PyPI - Status](https://img.shields.io/pypi/status/async-gpib)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # async_gpib
-Python3 AsyncIO [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python
+Python3 asyncio [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python
 [asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper
 library.
 
@@ -75,7 +75,7 @@ See [examples/](examples/) for more working examples.
 
 ## Versioning
 I use [SemVer](http://semver.org/) for versioning. For the versions available, see the
-[tags on this repository](https://github.com/PatrickBaus/pyAsyncPrologix/tags). 
+[tags on this repository](../../tags). 
 
 ## Documentation
 I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style for documentation.
