@@ -1,5 +1,5 @@
 [project]
-name = "async_gpib"
+name = "async-gpib"
 authors = [
   { name="Patrick Baus", email="patrick.baus@physik.tu-darmstadt.de" },
 ]
