@@ -76,7 +76,7 @@ See [examples/](examples/) for more working examples.
 
 ## Versioning
 I use [SemVer](http://semver.org/) for versioning. For the versions available, see the
-[tags on this repository](../../tags). 
+[tags on this repository](../../tags).
 
 ## Documentation
 I use the [Numpydoc](https://numpydoc.readthedocs.io/en/latest/format.html) style for documentation.

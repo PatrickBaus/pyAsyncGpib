@@ -1,6 +1,7 @@
 """
 This is a Python AsyncIO wrapper for Linux GPIB and the gpib_ctypes package.
 """
+
 from __future__ import annotations
 
 import asyncio
