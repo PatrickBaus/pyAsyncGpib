@@ -11,7 +11,7 @@ import logging
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
 from enum import Flag, unique
 from types import TracebackType
-from typing import Any, Callable, Type
+from typing import Any, Callable
 
 try:
     from typing import Self  # type: ignore # Python 3.11
@@ -105,7 +105,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
     def __str__(self) -> str:
         return f"Linux-GPIB at Gpib({self.__name})"
 
-    def __init__(  # pylint: disable=too-many-arguments
+    def __init__(  # pylint: disable=too-many-arguments,too-many-positional-arguments
         self,
         name: int | str = "gpib0",
         pad: int | None = None,
@@ -150,7 +150,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         return self
 
     async def __aexit__(
-        self, exc_type: Type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
+        self, exc_type: type[BaseException] | None, exc: BaseException | None, traceback: TracebackType | None
     ) -> None:
         await self.disconnect()
 
