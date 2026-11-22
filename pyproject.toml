@@ -35,8 +35,22 @@ dependencies = [
 "Download" = "https://github.com/PatrickBaus/pyAsyncGpib/releases"
 
 [project.optional-dependencies]
+# Needed to run the test suite. pytest-cov measures the coverage, see the [tool.coverage] sections below.
+test = [
+    "pytest", "pytest-cov",
+]
+# Linters and type checkers. pylint also checks examples/ and tests/, so it needs their dependencies.
+lint = [
+    "async-gpib[test]",
+    "black", "isort", "mypy", "pre-commit", "pylint", "setuptools",
+]
+# Building and publishing to PyPI
+build = [
+    "build", "twine",
+]
+# Everything needed for development
 dev = [
-    "black", "build", "isort", "mypy", "pre-commit", "pylint", "pytest", "twine",
+    "async-gpib[test,lint,build]",
 ]
 
 [tool.coverage.run]
@@ -50,9 +64,6 @@ relative_files = true
 
 [tool.coverage.report]
 show_missing = true
-test = [
-    "mypy", "pylint", "pytest", "setuptools",
-]
 
 [tool.pylint.'MESSAGES CONTROL']
 max-line-length = 120
