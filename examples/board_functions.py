@@ -29,7 +29,7 @@ gpib_device = AsyncGpib(name=0, pad=22)
 gpib_board = AsyncGpib(name=0)  # The controller board, *not* a device
 
 
-async def main():
+async def main() -> None:
     """Send a local lockout to all devices, wait for 5 seconds, then reactive them."""
     async with gpib_board, gpib_device:
         # Enable local lockout

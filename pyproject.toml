@@ -21,6 +21,7 @@ classifiers = [
     "Natural Language :: English",
     "Topic :: Home Automation",
     "Topic :: Scientific/Engineering",
+    "Typing :: Typed",
 ]
 keywords = ["linux-gpib", "GPIB", "API"]
 dynamic = ["version"]
@@ -85,6 +86,13 @@ target-version = ["py312"]
 
 [tool.mypy]
 python_version = "3.12"
+# Require @typing.override on every overriding method, so that renaming a base method cannot silently break a subclass
+enable_error_code = ["explicit-override"]
+strict = true
+
+[[tool.mypy.overrides]]
+# Neither Linux GPIB nor gpib_ctypes ship type hints
+module = ["gpib", "Gpib", "gpib_ctypes", "gpib_ctypes.*"]
 ignore_missing_imports = true
 
 [tool.pytest.ini_options]
