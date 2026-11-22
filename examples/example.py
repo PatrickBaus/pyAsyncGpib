@@ -24,7 +24,7 @@ import logging
 # Devices
 from async_gpib import AsyncGpib
 
-# The primary address (e.g. 22) can be anything. There is no device connection required for this example
+# The primary address of the SCPI device
 gpib_device = AsyncGpib(name=0, pad=21)
 
 
@@ -36,5 +36,6 @@ async def main():
         print("Device id:", await gpib_device.read())
 
 
-logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
-asyncio.run(main())
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
+    asyncio.run(main())

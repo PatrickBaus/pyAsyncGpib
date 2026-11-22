@@ -31,18 +31,15 @@ gpib_board = AsyncGpib(name=0)  # The controller board, *not* a device
 
 async def main():
     """Send a local lockout to all devices, wait for 5 seconds, then reactive them."""
-    try:
+    async with gpib_board, gpib_device:
         # Enable local lockout
         await gpib_board.remote_enable(True)  # The remote_enable() call only works with GPIB boards
         await asyncio.sleep(5.0)
         await gpib_board.remote_enable(False)
         # or alternatively
         # await gpib_device.ibloc()
-    finally:
-        # Disconnect from the GPIB controller. We may safely call disconnect() on a non-connected gpib device, even
-        # in case of a connection error
-        await gpib_device.disconnect()
 
 
-logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
-asyncio.run(main())
+if __name__ == "__main__":
+    logging.basicConfig(level=logging.DEBUG)  # Set to logging.INFO for less verbose output
+    asyncio.run(main())
