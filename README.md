@@ -1,4 +1,5 @@
-[![pylint](../../actions/workflows/pylint.yml/badge.svg)](../../actions/workflows/pylint.yml)
+[![pylint](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml/badge.svg)](https://github.com/PatrickBaus/pyAsyncGpib/actions/workflows/pylint.yml)
+[![Coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/PatrickBaus/pyAsyncGpib/python-coverage-comment-action-data/endpoint.json)](https://github.com/PatrickBaus/pyAsyncGpib/tree/python-coverage-comment-action-data)
 [![PyPI](https://img.shields.io/pypi/v/async-gpib)](https://pypi.org/project/async-gpib/)
 ![PyPI - Python Version](https://img.shields.io/pypi/pyversions/async-gpib)
 ![PyPI - Status](https://img.shields.io/pypi/status/async-gpib)
