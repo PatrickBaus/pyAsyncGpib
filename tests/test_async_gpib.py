@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import asyncio
+import ctypes
 import threading
 from collections.abc import Coroutine
 from types import SimpleNamespace
@@ -18,6 +19,7 @@ from async_gpib import AsyncGpib, EosType, GpibError
 from async_gpib import async_gpib as async_gpib_module
 
 TIMO = 0x4000
+END = 0x2000
 
 
 def make_gpib_error(message: str) -> Exception:
@@ -87,8 +89,11 @@ class FakeDevice:  # pylint: disable=missing-function-docstring,too-many-instanc
         self._call("write", data)
 
     def read(self, length: int) -> bytes:
-        self._call("read", length)
-        return self.read_response[:length]
+        ctypes.create_string_buffer(length)  # Like gpib_ctypes, so that a length of None raises a TypeError
+        # Like a device, that asserts EOI with the last byte of the message
+        data, self.read_response = self.read_response[:length], self.read_response[length:]
+        self._call("read", length, status=0 if self.read_response else END)
+        return data
 
     def listener(self, pad: int, sad: int) -> int:
         self._call("listener", pad, sad)
@@ -436,3 +441,35 @@ def test_wait_timeout() -> None:
 def test_version(monkeypatch: pytest.MonkeyPatch, version: bytes | str | None, expected: str | None) -> None:
     monkeypatch.setattr(async_gpib_module, "gpib", SimpleNamespace(version=lambda: version))
     assert run(AsyncGpib.version()) == expected
+
+
+@pytest.mark.parametrize("size", [0, 1, 511, 512, 513, 1500])
+def test_read_until_end_of_message(size: int) -> None:
+    """With length=None, the message is read in chunks until EOI, like the Prologix adapters do."""
+    message = bytes(i % 256 for i in range(size))
+
+    async def main() -> tuple[bytes, FakeDevice]:
+        gpib, device = await connected()
+        device.read_response = message
+        result = await gpib.read(None)
+        await gpib.close()
+        return result, device
+
+    result, device = run(main())
+    assert result == message
+    chunks = max(1, -(-size // 512))  # A read of an empty message still calls ibrd() once
+    assert device.calls[:-1] == [("read", 512)] * chunks
+    assert len(device.threads) == 1
+
+
+def test_read_until_end_of_message_timeout() -> None:
+    """A device, that does not end the message, times out while reading until the end."""
+
+    async def main() -> None:
+        gpib, device = await connected()
+        device.error = make_gpib_error("read() error")
+        device.error_status = TIMO | 0x8000
+        with pytest.raises(TimeoutError):
+            await gpib.read(None)
+
+    run(main())

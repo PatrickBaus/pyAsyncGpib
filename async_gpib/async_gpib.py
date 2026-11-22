@@ -17,6 +17,11 @@ try:
 except ModuleNotFoundError:
     from gpib_ctypes import Gpib, gpib
 
+#: The ibsta bit, that is set when a read was ended by EOI or the EOS character. Linux GPIB does not export it.
+_END = 0x2000
+#: The number of bytes requested per ibrd() call, when reading until the end of the message
+_READ_CHUNK_SIZE = 512
+
 #: The exception raised by the GPIB library in use (Linux GPIB or gpib_ctypes)
 GpibError: type[Exception] = gpib.GpibError
 
@@ -343,14 +348,15 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         self.__logger.debug("Writing data: %r", command)
         await self.__wrapper(device.write, command)
 
-    async def read(self, length: int = 512) -> bytes:
+    async def read(self, length: int | None = 512) -> bytes:
         """
         Read a number of data bytes by calling ibread.
 
         Parameters
         ----------
-        length: int, default=512
-            number of bytes to read
+        length: int or None, default=512
+            The maximum number of bytes to read. The read also ends, when the device asserts EOI or sends the EOS
+            character, if enabled. Set to None to read until the end of the message, however long it is.
 
         Returns
         -------
@@ -364,7 +370,21 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         ConnectionError
             If not connected
         """
-        result: bytes = await self.__wrapper(self.__get_device()[0].read, length)
+        device, _ = self.__get_device()
+
+        def read_until_end() -> bytes:
+            # ibsta is thread-local, so it must be read in the same thread as ibrd
+            chunks: list[bytes] = []
+            while True:
+                chunks.append(device.read(_READ_CHUNK_SIZE))
+                if device.ibsta() & _END:
+                    return b"".join(chunks)
+
+        result: bytes
+        if length is None:
+            result = await self.__wrapper(read_until_end)
+        else:
+            result = await self.__wrapper(device.read, length)
         self.__logger.debug("Data read: %r", result)
         return result
 
