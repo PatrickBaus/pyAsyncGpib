@@ -11,12 +11,7 @@ import logging
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
 from enum import Flag, unique
 from types import TracebackType
-from typing import Any, Callable
-
-try:
-    from typing import Self  # type: ignore # Python 3.11
-except ImportError:
-    from typing_extensions import Self
+from typing import Any, Callable, Self
 
 try:
     import Gpib
@@ -194,9 +189,6 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         await self.__wrapper(self.__device.close)
         try:
             self.__threadpool.shutdown(wait=True, cancel_futures=True)
-        except TypeError:
-            # Python < 3.9.0
-            self.__threadpool.shutdown(wait=True)
         finally:
             self.__device = None
             self.__threadpool = None
