@@ -5,8 +5,8 @@
 | Name                        |    Stmts |     Miss |   Branch |   BrPart |    Cover |   Missing |
 |---------------------------- | -------: | -------: | -------: | -------: | -------: | --------: |
 | async\_gpib/\_\_init\_\_.py |        3 |        0 |        0 |        0 |     100% |           |
-| async\_gpib/async\_gpib.py  |      151 |        0 |       22 |        0 |     100% |           |
-| **TOTAL**                   |  **154** |    **0** |   **22** |    **0** | **100%** |           |
+| async\_gpib/async\_gpib.py  |      162 |        0 |       26 |        0 |     100% |           |
+| **TOTAL**                   |  **165** |    **0** |   **26** |    **0** | **100%** |           |
 
 
 ## Setup coverage badge
