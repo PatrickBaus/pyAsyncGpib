@@ -28,7 +28,7 @@ from async_gpib import AsyncGpib
 gpib_device = AsyncGpib(name=0, pad=21)
 
 
-async def main():
+async def main() -> None:
     """This example will print ID of the attached SCPI device"""
     async with gpib_device:
         print("Controller version:", await gpib_device.version())

@@ -2,14 +2,13 @@
 This is a Python AsyncIO wrapper for Linux GPIB and the gpib_ctypes package.
 """
 
-from __future__ import annotations
-
 import asyncio
 import concurrent.futures
 import logging
+from collections.abc import Callable
 from enum import Flag, unique
 from types import TracebackType
-from typing import Any, Callable, Self
+from typing import Any, Self, override
 
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
 try:
@@ -19,9 +18,9 @@ except ModuleNotFoundError:
     from gpib_ctypes import Gpib, gpib
 
 #: The exception raised by the GPIB library in use (Linux GPIB or gpib_ctypes)
-GpibError = gpib.GpibError
+GpibError: type[Exception] = gpib.GpibError
 
-TIMEOUT_VALUES = {
+TIMEOUT_VALUES: dict[int, float] = {
     gpib.T10us: 10e-6,
     gpib.T30us: 30e-6,
     gpib.T100us: 100e-6,
@@ -54,7 +53,7 @@ class EosType(Flag):
     BIN = 1 << 12  # Match the EOS character against all 8 bits and not just the 7 least significant bits
 
 
-def _calculate_timeout_value(timeout: float | None):
+def _calculate_timeout_value(timeout: float | None) -> int:
     """
     Convert a timeout in seconds to the smallest GPIB timeout constant, that is at least as long.
 
@@ -74,13 +73,13 @@ def _calculate_timeout_value(timeout: float | None):
         If the timeout is negative.
     """
     if timeout is None:
-        return gpib.TNONE
+        return int(gpib.TNONE)
     if timeout < 0:
         raise ValueError(f"Invalid timeout: {timeout}. The timeout must not be negative.")
     for key, value in TIMEOUT_VALUES.items():
         if value >= timeout:
             return key
-    return gpib.T1000s
+    return int(gpib.T1000s)
 
 
 class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-attributes  # This is just a wrapper
@@ -132,6 +131,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         """
         return self.__device is not None
 
+    @override
     def __str__(self) -> str:
         return f"Linux-GPIB at Gpib({self.__name})"
 
@@ -178,7 +178,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         self.__timeout = _calculate_timeout_value(timeout)
         self.__send_eoi = bool(send_eoi)
         self.__eos_mode = ord(eos_character) | eos_mode.value
-        self.__device: Gpib.Gpib | None = None
+        self.__device: Any = None  # Gpib.Gpib, which is untyped
         self.__threadpool: concurrent.futures.ThreadPoolExecutor | None = None
 
         self.__logger = logging.getLogger(__name__)
@@ -232,14 +232,14 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
             raise ConnectionError("Not connected. Call connect() first.")
         return self.__device, self.__threadpool
 
-    async def __wrapper(self, func: Callable, *args: Any) -> Any:
+    async def __wrapper[T](self, func: Callable[..., T], *args: Any) -> T:
         """
         This is the actual wrapper, that runs the threaded Linux GPIB lib in the executor and
         returns a future to wait for.
         """
         device, threadpool = self.__get_device()
 
-        def call() -> Any:
+        def call() -> T:
             # ibsta is thread-local, so it must be read in the thread, that executed the failed call.
             try:
                 return func(*args)
@@ -364,7 +364,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         ConnectionError
             If not connected
         """
-        result = await self.__wrapper(self.__get_device()[0].read, length)
+        result: bytes = await self.__wrapper(self.__get_device()[0].read, length)
         self.__logger.debug("Data read: %r", result)
         return result
 
@@ -469,7 +469,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         def wait_and_check() -> int:
             # ibsta is thread-local, so it must be read in the same thread as ibwait
             device.wait(eventmask)
-            return device.ibsta()
+            return int(device.ibsta())
 
         ibsta = await self.__wrapper(wait_and_check)
         if ibsta & Gpib.TIMO:
@@ -604,7 +604,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
             If not connected
         """
         timeout = _calculate_timeout_value(value)
-        result = await self.__wrapper(self.__get_device()[0].timeout, timeout)
+        result: int = await self.__wrapper(self.__get_device()[0].timeout, timeout)
         self.__timeout = timeout
         return result
 
@@ -618,7 +618,7 @@ class AsyncGpib:  # pylint: disable=too-many-public-methods, too-many-instance-a
         str or None
              GPIB library version or None if the library does not support it.
         """
-        version = gpib.version()
+        version: bytes | str | None = gpib.version()
         if isinstance(version, bytes):
             return version.decode("utf-8")
         return version
