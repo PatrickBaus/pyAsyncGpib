@@ -6,9 +6,9 @@
 [![License: GPL v3](https://img.shields.io/badge/License-GPL%20v3-blue.svg)](LICENSE)
 [![code style](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 # async_gpib
-Python3 asyncio [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python
-[asyncio](https://docs.python.org/3/library/asyncio.html) and is a thin wrapper for the threaded Linux GPIB Wrapper
-library.
+Python3 asyncio [Linux GPIB Wrapper](https://linux-gpib.sourceforge.io/). The library requires Python 3.12 or newer
+and uses [asyncio](https://docs.python.org/3/library/asyncio.html). It is a thin wrapper for the threaded Linux GPIB
+Wrapper library.
 
 The library is fully type-hinted.
 
