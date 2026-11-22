@@ -14,7 +14,7 @@ from typing import Any, Callable, Self
 # Import either the Linux GPIB module or gpib_ctypes. Prefer Linux GPIB.
 try:
     import Gpib
-    import gpib
+    import gpib  # pragma: no cover  # The tests run against gpib_ctypes
 except ModuleNotFoundError:
     from gpib_ctypes import Gpib, gpib
 
