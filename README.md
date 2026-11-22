@@ -68,6 +68,9 @@ async with AsyncGpib(name=0, pad=22) as gpib_device:
     # Add your code here
     ...
 ```
+Errors reported by the GPIB library are raised as `async_gpib.GpibError`, timeouts as `TimeoutError` and calls on a
+closed connection as `ConnectionError`.
+
 See [examples/](examples/) for more working examples.
 
 ## Support for Multiple Devices
